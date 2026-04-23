@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RozgarSetu Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #E8531A;
+  --secondary: #1565C0;
+  --success: #2E7D32;
+  --warning: #F57F17;
+  --danger: #C62828;
+  --bg: #F5F5F5;
+  --sidebar: #1A1A2E;
+  --sidebar-active: #E8531A;
+  --card: #FFFFFF;
+  --text: #1A1A1A;
+  --text-muted: #757575;
+  --border: #E0E0E0;
+  --font: 'Inter', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* LOGIN */
+#login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1A1A2E 0%, #16213E 50%, #0F3460 100%);
+}
+.login-box {
+  background: white;
+  border-radius: 20px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+}
+.login-logo { text-align: center; margin-bottom: 32px; }
+.login-logo .icon { font-size: 48px; display: block; margin-bottom: 10px; }
+.login-logo h1 { font-size: 24px; font-weight: 800; color: var(--primary); }
+.login-logo p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+.form-group { margin-bottom: 18px; }
+.form-label { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+.form-input {
+  width: 100%;
+  padding: 13px 16px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: var(--font);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus { border-color: var(--primary); }
+.login-btn {
+  width: 100%;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 10px;
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.2s;
+}
+.login-btn:hover { background: #C04010; }
+.login-hint { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 16px; }
+.login-hint code { background: #F5F5F5; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+#login-err { color: var(--danger); font-size: 13px; margin-bottom: 12px; display: none; }
+
+/* ADMIN LAYOUT */
+#admin-layout { display: none; min-height: 100vh; }
+#admin-layout.active { display: flex; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background: var(--sidebar);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 100;
+  transition: transform 0.3s;
+}
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sidebar-logo span { font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.5); display: block; line-height: 1.2; }
+.nav-section { padding: 12px 0; flex: 1; overflow-y: auto; }
+.nav-label { padding: 8px 20px; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1px; }
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  color: rgba(255,255,255,0.65);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  transition: all 0.15s;
+  font-family: var(--font);
+  border-left: 3px solid transparent;
+}
+.nav-link:hover { background: rgba(255,255,255,0.08); color: white; }
+.nav-link.active { background: rgba(232,83,26,0.2); color: var(--primary); border-left-color: var(--primary); font-weight: 700; }
+.nav-link .nav-icon { font-size: 18px; width: 22px; text-align: center; }
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.admin-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.admin-name { font-size: 13px; font-weight: 600; color: white; }
+.admin-role { font-size: 11px; color: rgba(255,255,255,0.5); }
+
+/* MAIN CONTENT */
+.main-content {
+  margin-left: 240px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.top-bar {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 16px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.page-title { font-size: 20px; font-weight: 700; }
+.top-bar-actions { display: flex; gap: 12px; align-items: center; }
+.topbar-btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: white;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.topbar-btn:hover { background: var(--bg); }
+.topbar-btn.primary { background: var(--primary); color: white; border-color: var(--primary); }
+.topbar-btn.primary:hover { background: #C04010; }
+
+/* PANELS */
+.panel { display: none; padding: 28px; }
+.panel.active { display: block; }
+
+/* STAT CARDS */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 28px; }
+.stat-card {
+  background: white;
+  border-radius: 14px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--accent, var(--primary));
+}
+.stat-icon { font-size: 28px; margin-bottom: 14px; }
+.stat-num { font-size: 36px; font-weight: 800; color: var(--text); line-height: 1; }
+.stat-label { font-size: 13px; color: var(--text-muted); margin-top: 6px; font-weight: 500; }
+.stat-change { font-size: 12px; font-weight: 600; margin-top: 8px; }
+.stat-change.up { color: var(--success); }
+.stat-change.down { color: var(--danger); }
+
+/* TABLE */
+.table-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.table-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.table-title { font-size: 16px; font-weight: 700; }
+.search-input {
+  padding: 8px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 13px;
+  outline: none;
+  width: 220px;
+}
+.search-input:focus { border-color: var(--primary); }
+table { width: 100%; border-collapse: collapse; }
+th {
+  padding: 12px 22px;
+  background: #FAFAFA;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+td { padding: 14px 22px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #FAFAFA; }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.badge-success { background: #E8F5E9; color: var(--success); }
+.badge-warning { background: #FFF8E1; color: var(--warning); }
+.badge-danger { background: #FFEBEE; color: var(--danger); }
+.badge-info { background: #E3F2FD; color: var(--secondary); }
+.badge-gray { background: #F5F5F5; color: #666; }
+.action-btns { display: flex; gap: 6px; }
+.action-btn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: white;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.action-btn:hover { background: var(--bg); }
+.action-btn.approve { border-color: var(--success); color: var(--success); }
+.action-btn.approve:hover { background: var(--success); color: white; }
+.action-btn.reject { border-color: var(--danger); color: var(--danger); }
+.action-btn.reject:hover { background: var(--danger); color: white; }
+.action-btn.block { border-color: var(--warning); color: var(--warning); }
+.action-btn.block:hover { background: var(--warning); color: white; }
+.action-btn.delete { border-color: var(--danger); color: var(--danger); }
+.action-btn.delete:hover { background: var(--danger); color: white; }
+.action-btn.edit { border-color: var(--secondary); color: var(--secondary); }
+.action-btn.edit:hover { background: var(--secondary); color: white; }
+
+/* CHART */
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+.chart-card { background: white; border-radius: 14px; border: 1px solid var(--border); padding: 22px; }
+.chart-card-title { font-size: 15px; font-weight: 700; margin-bottom: 18px; }
+.bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 140px; }
+.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.bar-block {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  background: var(--primary);
+  opacity: 0.85;
+  transition: opacity 0.2s;
+  min-height: 4px;
+}
+.bar-block:hover { opacity: 1; }
+.bar-label { font-size: 10px; color: var(--text-muted); font-weight: 600; }
+.bar-val { font-size: 10px; color: var(--text); font-weight: 700; }
+.donut-chart { position: relative; width: 120px; height: 120px; margin: 0 auto; }
+.donut-chart svg { width: 100%; height: 100%; }
+.donut-legend { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* FORM */
+.form-card { background: white; border-radius: 14px; border: 1px solid var(--border); padding: 24px; margin-bottom: 24px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group { margin-bottom: 0; }
+.form-label-admin { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+.form-input-admin {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-input-admin:focus { border-color: var(--primary); }
+.save-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 11px 24px;
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: background 0.2s;
+}
+.save-btn:hover { background: #C04010; }
+
+/* MODAL */
+.modal-bg {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.modal-bg.open { display: flex; }
+.modal-box {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.modal-box h3 { font-size: 18px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.modal-close-btn {
+  background: var(--bg);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  top: 20px; right: 20px;
+  background: #333;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0;
+  z-index: 9999;
+  transition: all 0.3s;
+  transform: translateY(-10px);
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* ACTIVITY FEED */
+.activity-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.activity-content { flex: 1; }
+.activity-title { font-size: 14px; font-weight: 600; }
+.activity-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.activity-time { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+
+/* FRAUD FLAGS */
+.fraud-item {
+  background: #FFEBEE;
+  border: 1.5px solid #FFCDD2;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.fraud-icon { font-size: 24px; }
+.fraud-info { flex: 1; }
+.fraud-title { font-size: 14px; font-weight: 700; color: var(--danger); }
+.fraud-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* RESPONSIVE */
+@media(max-width: 900px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: none; }
+  .main-content { margin-left: 0; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .chart-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ====== LOGIN ====== -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <span class="icon">🌾</span>
+      <h1>RozgarSetu Admin</h1>
+      <p>Local Employment System — Admin Panel</p>
+    </div>
+    <div id="login-err">❌ Invalid credentials. Try admin / admin123</div>
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input class="form-input" id="admin-user" type="text" placeholder="admin" value="admin">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" id="admin-pass" type="password" placeholder="••••••••" value="admin123">
+    </div>
+    <button class="login-btn" onclick="adminLogin()">🔐 Login to Admin Panel</button>
+    <div class="login-hint">Demo: <code>admin</code> / <code>admin123</code> | <a href="index.html" style="color:var(--primary);">← Back to App</a></div>
+  </div>
+</div>
+
+<!-- ====== ADMIN LAYOUT ====== -->
+<div id="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      🌾 RozgarSetu
+      <span>Admin Dashboard v2.0</span>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Overview</div>
+      <button class="nav-link active" onclick="showPanel('dashboard')"><span class="nav-icon">📊</span>Dashboard</button>
+      <button class="nav-link" onclick="showPanel('analytics')"><span class="nav-icon">📈</span>Analytics</button>
+
+      <div class="nav-label">Content</div>
+      <button class="nav-link" onclick="showPanel('jobs')"><span class="nav-icon">💼</span>Manage Jobs</button>
+      <button class="nav-link" onclick="showPanel('categories')"><span class="nav-icon">📂</span>Categories</button>
+      <button class="nav-link" onclick="showPanel('applications')"><span class="nav-icon">📋</span>Applications</button>
+
+      <div class="nav-label">Users</div>
+      <button class="nav-link" onclick="showPanel('workers')"><span class="nav-icon">👷</span>Workers</button>
+      <button class="nav-link" onclick="showPanel('employers')"><span class="nav-icon">🏢</span>Employers</button>
+
+      <div class="nav-label">Safety</div>
+      <button class="nav-link" onclick="showPanel('fraud')"><span class="nav-icon">🚨</span>Fraud Detection</button>
+      <button class="nav-link" onclick="showPanel('reports')"><span class="nav-icon">📄</span>Reports</button>
+
+      <div class="nav-label">Settings</div>
+      <button class="nav-link" onclick="showPanel('settings')"><span class="nav-icon">⚙️</span>System Settings</button>
+    </div>
+    <div class="sidebar-footer">
+      <div class="admin-avatar">👑</div>
+      <div>
+        <div class="admin-name">Admin</div>
+        <div class="admin-role">Super Administrator</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div id="panel-title" class="page-title">📊 Dashboard</div>
+      <div class="top-bar-actions">
+        <button class="topbar-btn" onclick="refreshData()">🔄 Refresh</button>
+        <button class="topbar-btn primary" onclick="showPanel('jobs');setTimeout(()=>document.getElementById('add-job-form').scrollIntoView({behavior:'smooth'}),100)">➕ Add Job</button>
+        <button class="topbar-btn" onclick="adminLogout()">🚪 Logout</button>
+        <a href="index.html" class="topbar-btn">🏠 View App</a>
+      </div>
+    </div>
+
+    <!-- ====== DASHBOARD PANEL ====== -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="stats-grid" id="stats-grid"></div>
+
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-card-title">📊 Jobs by Category</div>
+          <div class="bar-chart" id="cat-chart"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title">📈 Job Status Distribution</div>
+          <div style="display:flex;align-items:center;gap:24px;">
+            <div class="donut-chart">
+              <svg viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15.9" fill="transparent" stroke="#E8531A" stroke-width="3.8" stroke-dasharray="75 25" stroke-dashoffset="25"/>
+                <circle cx="18" cy="18" r="15.9" fill="transparent" stroke="#1565C0" stroke-width="3.8" stroke-dasharray="15 85" stroke-dashoffset="-50"/>
+                <circle cx="18" cy="18" r="15.9" fill="transparent" stroke="#2E7D32" stroke-width="3.8" stroke-dasharray="10 90" stroke-dashoffset="-65"/>
+              </svg>
+            </div>
+            <div class="donut-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#E8531A"></div>Active (75%)</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#1565C0"></div>Pending (15%)</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#2E7D32"></div>Filled (10%)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+        <div class="table-card">
+          <div class="table-header"><div class="table-title">⚡ Recent Activity</div></div>
+          <div style="padding:4px 18px;" id="activity-feed"></div>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><div class="table-title">⏳ Pending Approvals</div><span id="pending-count" class="badge badge-warning">0</span></div>
+          <div style="padding:12px 18px;" id="pending-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== JOBS PANEL ====== -->
+    <div class="panel" id="panel-jobs">
+      <!-- ADD JOB FORM -->
+      <div class="form-card" id="add-job-form">
+        <div class="table-title" style="margin-bottom:18px;">➕ Add / Edit Job</div>
+        <div class="form-grid">
+          <div>
+            <label class="form-label-admin">Job Title</label>
+            <input class="form-input-admin" id="aj-title" placeholder="e.g. Truck Driver Needed">
+          </div>
+          <div>
+            <label class="form-label-admin">Category</label>
+            <select class="form-input-admin" id="aj-cat">
+              <option value="Driver">Driver</option>
+              <option value="Cleaner">Cleaner</option>
+              <option value="Labour">Labour</option>
+              <option value="Helper">Helper</option>
+              <option value="Delivery">Delivery</option>
+              <option value="Security">Security</option>
+              <option value="Cook">Cook</option>
+              <option value="Electrician">Electrician</option>
+              <option value="Plumber">Plumber</option>
+              <option value="Painter">Painter</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label-admin">Company</label>
+            <input class="form-input-admin" id="aj-company" placeholder="Company name">
+          </div>
+          <div>
+            <label class="form-label-admin">Salary (₹/month)</label>
+            <input class="form-input-admin" id="aj-salary" type="number" placeholder="12000">
+          </div>
+          <div>
+            <label class="form-label-admin">Job Type</label>
+            <select class="form-input-admin" id="aj-type">
+              <option value="Full Time">Full Time</option>
+              <option value="Part Time">Part Time</option>
+              <option value="Daily Wage">Daily Wage</option>
+              <option value="Contract">Contract</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label-admin">Location</label>
+            <input class="form-input-admin" id="aj-location" placeholder="Area, City">
+          </div>
+          <div>
+            <label class="form-label-admin">Contact</label>
+            <input class="form-input-admin" id="aj-contact" type="tel" placeholder="Mobile number">
+          </div>
+          <div>
+            <label class="form-label-admin">Status</label>
+            <select class="form-input-admin" id="aj-status">
+              <option value="true">Approved / Active</option>
+              <option value="false">Pending Review</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:12px;">
+          <label class="form-label-admin">Description</label>
+          <textarea class="form-input-admin" id="aj-desc" rows="3" placeholder="Job description, requirements..."></textarea>
+        </div>
+        <button class="save-btn" onclick="adminAddJob()">💾 Save Job</button>
+        <button class="save-btn" style="background:transparent;color:var(--text-muted);border:1.5px solid var(--border);margin-left:10px;" onclick="clearJobForm()">Clear</button>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">💼 All Jobs</div>
+          <input class="search-input" id="jobs-search" placeholder="🔍 Search jobs..." oninput="renderJobsTable()">
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="jobs-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Company</th>
+                <th>Salary</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Applications</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="jobs-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== WORKERS PANEL ====== -->
+    <div class="panel" id="panel-workers">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">👷 All Workers</div>
+          <input class="search-input" id="workers-search" placeholder="🔍 Search workers..." oninput="renderWorkersTable()">
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr><th>Name</th><th>Mobile</th><th>Skill</th><th>City</th><th>Experience</th><th>Applications</th><th>Rating</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="workers-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== EMPLOYERS PANEL ====== -->
+    <div class="panel" id="panel-employers">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">🏢 All Employers</div>
+          <input class="search-input" id="employers-search" placeholder="🔍 Search employers..." oninput="renderEmployersTable()">
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr><th>Company</th><th>Mobile</th><th>Type</th><th>City</th><th>Jobs Posted</th><th>Verified</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="employers-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== APPLICATIONS PANEL ====== -->
+    <div class="panel" id="panel-applications">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">📋 All Applications</div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr><th>Worker</th><th>Job</th><th>Company</th><th>Applied Date</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="apps-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== CATEGORIES PANEL ====== -->
+    <div class="panel" id="panel-categories">
+      <div class="form-card">
+        <div class="table-title" style="margin-bottom:18px;">➕ Add Category</div>
+        <div class="form-grid">
+          <div><label class="form-label-admin">Category Name</label><input class="form-input-admin" id="cat-name" placeholder="e.g. Gardener"></div>
+          <div><label class="form-label-admin">Emoji Icon</label><input class="form-input-admin" id="cat-emoji" placeholder="e.g. 🌱"></div>
+          <div><label class="form-label-admin">Hindi Name</label><input class="form-input-admin" id="cat-hindi" placeholder="e.g. माली"></div>
+        </div>
+        <button class="save-btn" onclick="addCategory()">➕ Add Category</button>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><div class="table-title">📂 All Categories</div></div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Emoji</th><th>Name</th><th>Hindi</th><th>Total Jobs</th><th>Actions</th></tr></thead>
+            <tbody id="cats-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== FRAUD PANEL ====== -->
+    <div class="panel" id="panel-fraud">
+      <div class="table-card" style="padding:22px;">
+        <div class="table-title" style="margin-bottom:16px;">🚨 Fraud & Spam Detection System</div>
+        <div id="fraud-list"></div>
+      </div>
+      <div class="table-card" style="padding:22px;margin-top:18px;">
+        <div class="table-title" style="margin-bottom:16px;">🛡️ Auto-Detection Rules</div>
+        <div style="display:grid;gap:10px;" id="fraud-rules"></div>
+      </div>
+    </div>
+
+    <!-- ====== ANALYTICS PANEL ====== -->
+    <div class="panel" id="panel-analytics">
+      <div class="stats-grid" id="analytics-stats"></div>
+      <div class="table-card" style="padding:22px;">
+        <div class="table-title" style="margin-bottom:16px;">📊 Weekly Job Applications</div>
+        <div class="bar-chart" id="weekly-chart" style="height:180px;"></div>
+      </div>
+    </div>
+
+    <!-- ====== REPORTS PANEL ====== -->
+    <div class="panel" id="panel-reports">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+        <div class="form-card">
+          <div class="table-title" style="margin-bottom:16px;">📄 Generate Reports</div>
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label-admin">Report Type</label>
+            <select class="form-input-admin" id="report-type">
+              <option>Worker Registration Report</option>
+              <option>Job Postings Report</option>
+              <option>Application Status Report</option>
+              <option>Employer Activity Report</option>
+              <option>Category Performance Report</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label-admin">Date Range</label>
+            <select class="form-input-admin">
+              <option>Last 7 days</option>
+              <option>Last 30 days</option>
+              <option>Last 3 months</option>
+              <option>All time</option>
+            </select>
+          </div>
+          <button class="save-btn" onclick="generateReport()">📊 Generate Report</button>
+        </div>
+        <div class="form-card" id="report-output">
+          <div class="table-title">Report will appear here</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== SETTINGS PANEL ====== -->
+    <div class="panel" id="panel-settings">
+      <div class="form-card">
+        <div class="table-title" style="margin-bottom:20px;">⚙️ System Settings</div>
+        <div class="form-grid">
+          <div><label class="form-label-admin">App Name</label><input class="form-input-admin" value="RozgarSetu"></div>
+          <div><label class="form-label-admin">Admin Email</label><input class="form-input-admin" value="admin@rozgarsetu.in" type="email"></div>
+          <div><label class="form-label-admin">Default City</label><input class="form-input-admin" value="Lucknow"></div>
+          <div><label class="form-label-admin">Max Jobs Per Employer</label><input class="form-input-admin" value="10" type="number"></div>
+        </div>
+        <div style="margin-top:16px;">
+          <label class="form-label-admin" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+            <input type="checkbox" checked> Auto-approve jobs from verified employers
+          </label>
+        </div>
+        <div style="margin-top:12px;">
+          <label class="form-label-admin" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+            <input type="checkbox" checked> Send SMS notifications to workers
+          </label>
+        </div>
+        <div style="margin-top:12px;">
+          <label class="form-label-admin" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+            <input type="checkbox"> Require email verification
+          </label>
+        </div>
+        <button class="save-btn" onclick="showToast('✅ Settings saved!')">💾 Save Settings</button>
+      </div>
+
+      <div class="form-card">
+        <div class="table-title" style="margin-bottom:16px;">🔑 Change Admin Password</div>
+        <div class="form-grid">
+          <div><label class="form-label-admin">Current Password</label><input class="form-input-admin" type="password" placeholder="••••••••"></div>
+          <div><label class="form-label-admin">New Password</label><input class="form-input-admin" type="password" placeholder="••••••••"></div>
+        </div>
+        <button class="save-btn" onclick="showToast('✅ Password updated!')">🔐 Update Password</button>
+      </div>
+    </div>
+
+  </main><!-- end main-content -->
+</div><!-- end admin-layout -->
+
+<!-- Edit Job Modal -->
+<div class="modal-bg" id="edit-job-modal">
+  <div class="modal-box">
+    <h3>✏️ Edit Job <button class="modal-close-btn" onclick="closeEditModal()">✕</button></h3>
+    <div id="edit-job-content"></div>
+  </div>
+</div>
+
+<script>
+// ============ DATA ACCESS ============
+const DB = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } },
+  set(k, v) { localStorage.setItem(k, JSON.stringify(v)); },
+  getObj(k) { try { return JSON.parse(localStorage.getItem(k)) || null; } catch { return null; } }
+};
+
+const CATS_DEFAULT = [
+  { name: "Driver", hindi: "ड्राइवर", emoji: "🚛" },
+  { name: "Cleaner", hindi: "सफाई", emoji: "🧹" },
+  { name: "Labour", hindi: "मजदूर", emoji: "🔨" },
+  { name: "Helper", hindi: "सहायक", emoji: "🤝" },
+  { name: "Delivery", hindi: "डिलीवरी", emoji: "📦" },
+  { name: "Security", hindi: "सुरक्षा", emoji: "🛡️" },
+  { name: "Cook", hindi: "रसोईया", emoji: "🍳" },
+  { name: "Electrician", hindi: "बिजली", emoji: "⚡" },
+  { name: "Plumber", hindi: "प्लम्बर", emoji: "🔧" },
+  { name: "Painter", hindi: "पेंटर", emoji: "🎨" }
+];
+
+if (!DB.get('admin-cats').length) DB.set('admin-cats', CATS_DEFAULT);
+
+// ============ LOGIN ============
+function adminLogin() {
+  const u = document.getElementById('admin-user').value;
+  const p = document.getElementById('admin-pass').value;
+  const err = document.getElementById('login-err');
+
+  if (u === 'admin' && p === 'admin123') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-layout').classList.add('active');
+    refreshData();
+    err.style.display = 'none';
+  } else {
+    err.style.display = 'block';
+  }
+}
+
+function adminLogout() {
+  document.getElementById('admin-layout').classList.remove('active');
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+// ============ PANEL NAVIGATION ============
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById(`panel-${name}`)?.classList.add('active');
+  document.querySelector(`.nav-link[onclick*="${name}"]`)?.classList.add('active');
+
+  const titles = {
+    dashboard: '📊 Dashboard',
+    jobs: '💼 Manage Jobs',
+    workers: '👷 Workers',
+    employers: '🏢 Employers',
+    applications: '📋 Applications',
+    categories: '📂 Categories',
+    fraud: '🚨 Fraud Detection',
+    analytics: '📈 Analytics',
+    reports: '📄 Reports',
+    settings: '⚙️ System Settings'
+  };
+  document.getElementById('panel-title').textContent = titles[name] || name;
+
+  if (name === 'jobs') renderJobsTable();
+  if (name === 'workers') renderWorkersTable();
+  if (name === 'employers') renderEmployersTable();
+  if (name === 'applications') renderAppsTable();
+  if (name === 'categories') renderCatsTable();
+  if (name === 'fraud') renderFraud();
+  if (name === 'analytics') renderAnalytics();
+}
+
+function refreshData() {
+  renderDashboard();
+  renderJobsTable();
+}
+
+// ============ DASHBOARD ============
+function renderDashboard() {
+  const jobs = DB.get('jobs');
+  const workers = DB.get('workers');
+  const employers = DB.get('employers');
+  const apps = DB.get('applications');
+  const pending = jobs.filter(j => !j.approved).length;
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card" style="--accent:#E8531A">
+      <div class="stat-icon">💼</div>
+      <div class="stat-num">${jobs.length}</div>
+      <div class="stat-label">Total Jobs</div>
+      <div class="stat-change up">↑ ${jobs.filter(j=>j.approved).length} active</div>
+    </div>
+    <div class="stat-card" style="--accent:#1565C0">
+      <div class="stat-icon">👷</div>
+      <div class="stat-num">${workers.length}</div>
+      <div class="stat-label">Registered Workers</div>
+      <div class="stat-change up">↑ Growing daily</div>
+    </div>
+    <div class="stat-card" style="--accent:#2E7D32">
+      <div class="stat-icon">🏢</div>
+      <div class="stat-num">${employers.length}</div>
+      <div class="stat-label">Employers</div>
+      <div class="stat-change up">↑ ${employers.filter(e=>e.verified).length} verified</div>
+    </div>
+    <div class="stat-card" style="--accent:#F57F17">
+      <div class="stat-icon">📋</div>
+      <div class="stat-num">${apps.length}</div>
+      <div class="stat-label">Applications</div>
+      <div class="stat-change ${pending>0?'down up':''}">${pending} pending approvals</div>
+    </div>
+  `;
+
+  // Category chart
+  const cats = DB.get('admin-cats');
+  const catMax = Math.max(...cats.map(c => jobs.filter(j => j.category === c.name).length), 1);
+  document.getElementById('cat-chart').innerHTML = cats.slice(0, 6).map(c => {
+    const count = jobs.filter(j => j.category === c.name).length;
+    const h = Math.round((count / catMax) * 120);
+    return `
+      <div class="bar-col">
+        <div class="bar-val">${count}</div>
+        <div class="bar-block" style="height:${Math.max(h,4)}px;"></div>
+        <div class="bar-label">${c.emoji}<br>${c.name.slice(0,5)}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Activity feed
+  document.getElementById('activity-feed').innerHTML = [
+    { icon: '👷', bg: '#E3F2FD', text: `${workers.length} workers registered`, time: 'Total' },
+    { icon: '💼', bg: '#E8F5E9', text: `${jobs.filter(j=>j.approved).length} jobs live`, time: 'Active' },
+    { icon: '📋', bg: '#FFF3E0', text: `${apps.length} applications submitted`, time: 'Total' },
+    { icon: '⏳', bg: '#FFEBEE', text: `${pending} jobs pending review`, time: 'Pending' },
+  ].map(a => `
+    <div class="activity-item">
+      <div class="activity-dot" style="background:${a.bg}">${a.icon}</div>
+      <div class="activity-content">
+        <div class="activity-title">${a.text}</div>
+        <div class="activity-sub">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Pending approvals
+  const pendingJobs = jobs.filter(j => !j.approved);
+  document.getElementById('pending-count').textContent = pendingJobs.length;
+  document.getElementById('pending-list').innerHTML = pendingJobs.length
+    ? pendingJobs.map(j => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-size:14px;font-weight:600;">${j.title}</div>
+          <div style="font-size:12px;color:var(--text-muted);">${j.company} • ${j.category}</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="action-btn approve" onclick="approveJob(${j.id})">✅</button>
+          <button class="action-btn reject" onclick="rejectJob(${j.id})">❌</button>
+        </div>
+      </div>
+    `).join('')
+    : '<div style="color:var(--text-muted);font-size:14px;padding:10px 0;">✅ No pending jobs!</div>';
+}
+
+// ============ JOBS TABLE ============
+function renderJobsTable() {
+  const search = document.getElementById('jobs-search')?.value.toLowerCase() || '';
+  let jobs = DB.get('jobs');
+  if (search) jobs = jobs.filter(j =>
+    j.title.toLowerCase().includes(search) ||
+    j.category.toLowerCase().includes(search) ||
+    j.company.toLowerCase().includes(search)
+  );
+  const apps = DB.get('applications');
+
+  document.getElementById('jobs-tbody').innerHTML = jobs.map(j => `
+    <tr>
+      <td><div style="font-weight:600;">${j.title}</div><div style="font-size:11px;color:var(--text-muted);">${j.date||'Recent'}</div></td>
+      <td><span class="badge badge-info">${j.category}</span></td>
+      <td>${j.company}</td>
+      <td style="font-weight:700;color:var(--success);">₹${j.salary.toLocaleString()}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${j.location}</td>
+      <td><span class="badge ${j.approved?'badge-success':'badge-warning'}">${j.approved?'✅ Active':'⏳ Pending'}</span></td>
+      <td><span class="badge badge-gray">${apps.filter(a=>a.jobId===j.id).length} apps</span></td>
+      <td>
+        <div class="action-btns">
+          ${!j.approved ? `<button class="action-btn approve" onclick="approveJob(${j.id})">Approve</button>` : `<button class="action-btn block" onclick="pauseJob(${j.id})">Pause</button>`}
+          <button class="action-btn edit" onclick="editJob(${j.id})">Edit</button>
+          <button class="action-btn delete" onclick="deleteJob(${j.id})">Delete</button>
+        </div>
+      </td>
+    </tr>
+  `).join('') || `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-muted);">No jobs found</td></tr>`;
+}
+
+function approveJob(id) {
+  const jobs = DB.get('jobs');
+  const idx = jobs.findIndex(j => j.id === id);
+  if (idx >= 0) { jobs[idx].approved = true; DB.set('jobs', jobs); }
+  renderDashboard();
+  renderJobsTable();
+  showToast('✅ Job approved and published!');
+}
+
+function rejectJob(id) {
+  if (!confirm('Reject this job?')) return;
+  const jobs = DB.get('jobs');
+  const idx = jobs.findIndex(j => j.id === id);
+  if (idx >= 0) { jobs[idx].approved = false; DB.set('jobs', jobs); }
+  renderDashboard();
+  renderJobsTable();
+  showToast('❌ Job rejected');
+}
+
+function pauseJob(id) {
+  const jobs = DB.get('jobs');
+  const idx = jobs.findIndex(j => j.id === id);
+  if (idx >= 0) { jobs[idx].approved = false; DB.set('jobs', jobs); }
+  renderJobsTable();
+  renderDashboard();
+  showToast('⏸️ Job paused');
+}
+
+function deleteJob(id) {
+  if (!confirm('Permanently delete this job?')) return;
+  let jobs = DB.get('jobs');
+  jobs = jobs.filter(j => j.id !== id);
+  DB.set('jobs', jobs);
+  renderJobsTable();
+  renderDashboard();
+  showToast('🗑️ Job deleted');
+}
+
+function editJob(id) {
+  const job = DB.get('jobs').find(j => j.id === id);
+  if (!job) return;
+  document.getElementById('edit-job-content').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div><label class="form-label-admin">Title</label><input class="form-input-admin" id="ej-title" value="${job.title}"></div>
+      <div><label class="form-label-admin">Salary</label><input class="form-input-admin" id="ej-salary" type="number" value="${job.salary}"></div>
+      <div><label class="form-label-admin">Location</label><input class="form-input-admin" id="ej-location" value="${job.location}"></div>
+      <div><label class="form-label-admin">Contact</label><input class="form-input-admin" id="ej-contact" value="${job.contact||''}"></div>
+    </div>
+    <div style="margin-top:12px;"><label class="form-label-admin">Description</label><textarea class="form-input-admin" id="ej-desc" rows="3">${job.desc||''}</textarea></div>
+    <button class="save-btn" onclick="saveEditJob(${id})" style="margin-top:14px;">💾 Save Changes</button>
+  `;
+  document.getElementById('edit-job-modal').classList.add('open');
+}
+
+function saveEditJob(id) {
+  const jobs = DB.get('jobs');
+  const idx = jobs.findIndex(j => j.id === id);
+  if (idx < 0) return;
+  jobs[idx].title = document.getElementById('ej-title').value;
+  jobs[idx].salary = parseInt(document.getElementById('ej-salary').value);
+  jobs[idx].location = document.getElementById('ej-location').value;
+  jobs[idx].contact = document.getElementById('ej-contact').value;
+  jobs[idx].desc = document.getElementById('ej-desc').value;
+  DB.set('jobs', jobs);
+  closeEditModal();
+  renderJobsTable();
+  showToast('✅ Job updated!');
+}
+
+function closeEditModal() {
+  document.getElementById('edit-job-modal').classList.remove('open');
+}
+
+function adminAddJob() {
+  const title = document.getElementById('aj-title').value.trim();
+  const company = document.getElementById('aj-company').value.trim();
+  const salary = parseInt(document.getElementById('aj-salary').value);
+  const location = document.getElementById('aj-location').value.trim();
+  const contact = document.getElementById('aj-contact').value.trim();
+
+  if (!title || !company || !salary || !location) { showToast('⚠️ Fill all required fields'); return; }
+
+  const jobs = DB.get('jobs');
+  jobs.push({
+    id: Date.now(),
+    title,
+    category: document.getElementById('aj-cat').value,
+    company,
+    salary,
+    type: document.getElementById('aj-type').value,
+    location,
+    desc: document.getElementById('aj-desc').value,
+    contact,
+    approved: document.getElementById('aj-status').value === 'true',
+    rating: 4.5,
+    distance: "? km",
+    lat: 26.85, lng: 80.95,
+    date: "Just now",
+    postedBy: "admin"
+  });
+  DB.set('jobs', jobs);
+  clearJobForm();
+  renderJobsTable();
+  renderDashboard();
+  showToast('✅ Job added successfully!');
+}
+
+function clearJobForm() {
+  ['aj-title','aj-company','aj-salary','aj-location','aj-contact','aj-desc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+
+// ============ WORKERS TABLE ============
+function renderWorkersTable() {
+  const search = document.getElementById('workers-search')?.value.toLowerCase() || '';
+  let workers = DB.get('workers');
+  if (search) workers = workers.filter(w =>
+    w.name.toLowerCase().includes(search) ||
+    w.mobile.includes(search) ||
+    w.skill.toLowerCase().includes(search)
+  );
+  const apps = DB.get('applications');
+
+  document.getElementById('workers-tbody').innerHTML = workers.map(w => `
+    <tr>
+      <td><div style="font-weight:600;">${w.name}</div><div style="font-size:11px;color:var(--text-muted);">Joined ${w.joinDate||'Recently'}</div></td>
+      <td>${w.mobile}</td>
+      <td><span class="badge badge-info">${w.skill}</span></td>
+      <td>${w.city}</td>
+      <td>${w.exp}</td>
+      <td>${apps.filter(a=>a.workerId===w.id).length}</td>
+      <td>⭐ ${w.rating||4.5}</td>
+      <td><span class="badge ${w.blocked?'badge-danger':'badge-success'}">${w.blocked?'Blocked':'Active'}</span></td>
+      <td>
+        <div class="action-btns">
+          <button class="action-btn block" onclick="toggleBlockWorker(${w.id})">${w.blocked?'Unblock':'Block'}</button>
+          <button class="action-btn delete" onclick="deleteWorker(${w.id})">Remove</button>
+        </div>
+      </td>
+    </tr>
+  `).join('') || `<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-muted);">No workers registered yet. <a href="index.html">Go to app →</a></td></tr>`;
+}
+
+function toggleBlockWorker(id) {
+  const workers = DB.get('workers');
+  const idx = workers.findIndex(w => w.id === id);
+  if (idx >= 0) { workers[idx].blocked = !workers[idx].blocked; DB.set('workers', workers); }
+  renderWorkersTable();
+  showToast('✅ Worker status updated');
+}
+
+function deleteWorker(id) {
+  if (!confirm('Remove this worker?')) return;
+  let workers = DB.get('workers');
+  workers = workers.filter(w => w.id !== id);
+  DB.set('workers', workers);
+  renderWorkersTable();
+  showToast('🗑️ Worker removed');
+}
+
+// ============ EMPLOYERS TABLE ============
+function renderEmployersTable() {
+  const search = document.getElementById('employers-search')?.value.toLowerCase() || '';
+  let employers = DB.get('employers');
+  if (search) employers = employers.filter(e =>
+    e.name.toLowerCase().includes(search) ||
+    e.mobile.includes(search)
+  );
+  const jobs = DB.get('jobs');
+
+  document.getElementById('employers-tbody').innerHTML = employers.map(e => `
+    <tr>
+      <td><div style="font-weight:600;">${e.name}</div></td>
+      <td>${e.mobile}</td>
+      <td>${e.type}</td>
+      <td>${e.city}</td>
+      <td>${jobs.filter(j=>j.employerId===e.id).length}</td>
+      <td><span class="badge ${e.verified?'badge-success':'badge-warning'}">${e.verified?'✅ Verified':'⏳ Pending'}</span></td>
+      <td>
+        <div class="action-btns">
+          <button class="action-btn approve" onclick="verifyEmployer(${e.id})">${e.verified?'Unverify':'Verify'}</button>
+          <button class="action-btn delete" onclick="deleteEmployer(${e.id})">Remove</button>
+        </div>
+      </td>
+    </tr>
+  `).join('') || `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted);">No employers registered yet.</td></tr>`;
+}
+
+function verifyEmployer(id) {
+  const employers = DB.get('employers');
+  const idx = employers.findIndex(e => e.id === id);
+  if (idx >= 0) { employers[idx].verified = !employers[idx].verified; DB.set('employers', employers); }
+  renderEmployersTable();
+  showToast('✅ Employer verification updated');
+}
+
+function deleteEmployer(id) {
+  if (!confirm('Remove this employer?')) return;
+  let employers = DB.get('employers');
+  employers = employers.filter(e => e.id !== id);
+  DB.set('employers', employers);
+  renderEmployersTable();
+  showToast('🗑️ Employer removed');
+}
+
+// ============ APPLICATIONS TABLE ============
+function renderAppsTable() {
+  const apps = DB.get('applications');
+  document.getElementById('apps-tbody').innerHTML = apps.map(a => `
+    <tr>
+      <td><div style="font-weight:600;">${a.workerName}</div><div style="font-size:11px;color:var(--text-muted);">${a.workerSkill} • ${a.workerMobile}</div></td>
+      <td>${a.jobTitle}</td>
+      <td>${a.company}</td>
+      <td>${a.date}</td>
+      <td><span class="badge ${a.status==='Pending'?'badge-warning':a.status==='Hired'?'badge-success':'badge-gray'}">${a.status}</span></td>
+      <td>
+        <div class="action-btns">
+          <button class="action-btn approve" onclick="updateAppStatus(${a.id},'Shortlisted')">Shortlist</button>
+          <button class="action-btn edit" onclick="updateAppStatus(${a.id},'Hired')">Hired</button>
+          <button class="action-btn reject" onclick="updateAppStatus(${a.id},'Rejected')">Reject</button>
+        </div>
+      </td>
+    </tr>
+  `).join('') || `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">No applications yet.</td></tr>`;
+}
+
+function updateAppStatus(id, status) {
+  const apps = DB.get('applications');
+  const idx = apps.findIndex(a => a.id === id);
+  if (idx >= 0) { apps[idx].status = status; DB.set('applications', apps); }
+  renderAppsTable();
+  showToast(`✅ Application marked as ${status}`);
+}
+
+// ============ CATEGORIES TABLE ============
+function renderCatsTable() {
+  const cats = DB.get('admin-cats');
+  const jobs = DB.get('jobs');
+  document.getElementById('cats-tbody').innerHTML = cats.map((c, i) => `
+    <tr>
+      <td style="font-size:28px;">${c.emoji}</td>
+      <td style="font-weight:600;">${c.name}</td>
+      <td style="font-family:'Noto Sans Devanagari',sans-serif;">${c.hindi}</td>
+      <td><span class="badge badge-info">${jobs.filter(j=>j.category===c.name).length} jobs</span></td>
+      <td>
+        <button class="action-btn delete" onclick="deleteCat(${i})">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function addCategory() {
+  const name = document.getElementById('cat-name').value.trim();
+  const emoji = document.getElementById('cat-emoji').value.trim();
+  const hindi = document.getElementById('cat-hindi').value.trim();
+  if (!name) { showToast('⚠️ Name required'); return; }
+  const cats = DB.get('admin-cats');
+  cats.push({ name, emoji: emoji || '📌', hindi: hindi || name });
+  DB.set('admin-cats', cats);
+  renderCatsTable();
+  ['cat-name','cat-emoji','cat-hindi'].forEach(id => document.getElementById(id).value = '');
+  showToast('✅ Category added!');
+}
+
+function deleteCat(i) {
+  if (!confirm('Delete this category?')) return;
+  const cats = DB.get('admin-cats');
+  cats.splice(i, 1);
+  DB.set('admin-cats', cats);
+  renderCatsTable();
+  showToast('🗑️ Category deleted');
+}
+
+// ============ FRAUD DETECTION ============
+function renderFraud() {
+  const workers = DB.get('workers');
+  const jobs = DB.get('jobs');
+  const flags = [];
+
+  // Detect: same mobile multiple accounts
+  const mobiles = {};
+  workers.forEach(w => { mobiles[w.mobile] = (mobiles[w.mobile]||0)+1; });
+  Object.entries(mobiles).forEach(([m, c]) => {
+    if (c > 1) flags.push({ icon: '⚠️', title: `Duplicate mobile: ${m}`, sub: `${c} accounts with same number`, level: 'high' });
+  });
+
+  // Detect: unrealistic salary
+  jobs.forEach(j => {
+    if (j.salary > 100000) flags.push({ icon: '💰', title: `Suspicious salary in "${j.title}"`, sub: `₹${j.salary.toLocaleString()} seems unusually high`, level: 'medium' });
+  });
+
+  // Detect: missing contact
+  jobs.forEach(j => {
+    if (!j.contact || j.contact.length < 10) flags.push({ icon: '📞', title: `Missing contact in "${j.title}"`, sub: 'Job post has no valid contact number', level: 'high' });
+  });
+
+  if (!flags.length) flags.push({ icon: '✅', title: 'No fraud detected', sub: 'System looks clean!', level: 'safe' });
+
+  document.getElementById('fraud-list').innerHTML = flags.map(f => `
+    <div class="fraud-item" style="background:${f.level==='safe'?'#E8F5E9':f.level==='high'?'#FFEBEE':'#FFF8E1'};border-color:${f.level==='safe'?'#C8E6C9':f.level==='high'?'#FFCDD2':'#FFE082'};">
+      <div class="fraud-icon">${f.icon}</div>
+      <div class="fraud-info">
+        <div class="fraud-title" style="color:${f.level==='safe'?'var(--success)':f.level==='high'?'var(--danger)':'var(--warning)'};">${f.title}</div>
+        <div class="fraud-sub">${f.sub}</div>
+      </div>
+      ${f.level !== 'safe' ? `<button class="action-btn reject" style="white-space:nowrap;">Flag</button>` : ''}
+    </div>
+  `).join('');
+
+  document.getElementById('fraud-rules').innerHTML = [
+    { icon: '🔴', rule: 'Duplicate mobile detection', desc: 'Block same mobile on multiple accounts' },
+    { icon: '🟡', rule: 'Salary validation', desc: 'Flag jobs with salary >₹1,00,000/month' },
+    { icon: '🟡', rule: 'Contact verification', desc: 'Require valid 10-digit mobile' },
+    { icon: '🔴', rule: 'Spam keyword filter', desc: 'Block posts with spam/scam keywords' },
+    { icon: '🟢', rule: 'Employer verification', desc: 'Verify employers before job approval' },
+  ].map(r => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;background:white;border:1px solid var(--border);">
+      <span style="font-size:20px;">${r.icon}</span>
+      <div>
+        <div style="font-weight:600;font-size:14px;">${r.rule}</div>
+        <div style="font-size:12px;color:var(--text-muted);">${r.desc}</div>
+      </div>
+      <label style="margin-left:auto;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12px;">
+        <input type="checkbox" checked> Enabled
+      </label>
+    </div>
+  `).join('');
+}
+
+// ============ ANALYTICS ============
+function renderAnalytics() {
+  const jobs = DB.get('jobs');
+  const workers = DB.get('workers');
+  const apps = DB.get('applications');
+
+  document.getElementById('analytics-stats').innerHTML = `
+    <div class="stat-card" style="--accent:#E8531A"><div class="stat-icon">📊</div><div class="stat-num">${Math.round(apps.length/(workers.length||1)*100)/100}</div><div class="stat-label">Avg. Applications per Worker</div></div>
+    <div class="stat-card" style="--accent:#1565C0"><div class="stat-icon">✅</div><div class="stat-num">${jobs.filter(j=>j.approved).length}</div><div class="stat-label">Active Job Listings</div></div>
+    <div class="stat-card" style="--accent:#2E7D32"><div class="stat-icon">🗺️</div><div class="stat-num">${new Set(jobs.map(j=>j.location.split(',')[0])).size}</div><div class="stat-label">Unique Areas</div></div>
+    <div class="stat-card" style="--accent:#F57F17"><div class="stat-icon">💰</div><div class="stat-num">₹${Math.round(jobs.reduce((s,j)=>s+j.salary,0)/(jobs.length||1)).toLocaleString()}</div><div class="stat-label">Average Salary</div></div>
+  `;
+
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const maxH = 160;
+  document.getElementById('weekly-chart').innerHTML = days.map((d, i) => {
+    const val = Math.floor(Math.random() * 15) + 3;
+    const h = Math.round((val / 20) * maxH);
+    return `
+      <div class="bar-col">
+        <div class="bar-val">${val}</div>
+        <div class="bar-block" style="height:${h}px;background:${i===5||i===6?'#1565C0':'#E8531A'};"></div>
+        <div class="bar-label">${d}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============ REPORTS ============
+function generateReport() {
+  const type = document.getElementById('report-type').value;
+  const jobs = DB.get('jobs');
+  const workers = DB.get('workers');
+  const apps = DB.get('applications');
+
+  let html = `<div class="table-title" style="margin-bottom:14px;">📄 ${type}</div>`;
+  html += `<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Generated: ${new Date().toLocaleString()}</div>`;
+
+  if (type.includes('Worker')) {
+    html += `<div style="display:grid;gap:8px;">
+      ${workers.map(w => `<div style="padding:10px;background:var(--bg);border-radius:8px;font-size:13px;"><strong>${w.name}</strong> — ${w.skill}, ${w.city}</div>`).join('') || 'No workers'}
+    </div>`;
+  } else if (type.includes('Job')) {
+    html += `<div style="display:grid;gap:8px;">
+      ${jobs.map(j => `<div style="padding:10px;background:var(--bg);border-radius:8px;font-size:13px;"><strong>${j.title}</strong> — ₹${j.salary.toLocaleString()}, ${j.approved?'Active':'Pending'}</div>`).join('')}
+    </div>`;
+  } else {
+    html += `<div style="padding:14px;background:var(--bg);border-radius:8px;">
+      <div>Total Applications: <strong>${apps.length}</strong></div>
+      <div style="margin-top:8px;">Pending: <strong>${apps.filter(a=>a.status==='Pending').length}</strong></div>
+      <div>Hired: <strong>${apps.filter(a=>a.status==='Hired').length}</strong></div>
+    </div>`;
+  }
+
+  document.getElementById('report-output').innerHTML = html;
+  showToast('✅ Report generated!');
+}
+
+// ============ TOAST ============
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ============ EVENT LISTENERS ============
+document.getElementById('edit-job-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('edit-job-modal')) closeEditModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') adminLogin();
+});
+</script>
+</body>
+</html>
